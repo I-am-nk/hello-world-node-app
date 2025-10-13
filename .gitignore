@@ -1,0 +1,14 @@
+node_modules/
+npm-debug.log*
+.env
+.DS_Store
+.vscode/
+.idea/
+dist/
+build/
+out/
+coverage/
+.terraform/
+terraform.tfstate*
+.kube/
+.aws/
