@@ -1,0 +1,97 @@
+name: CI/CD - Node.js App to EKS via Docker Hub
+
+on:
+  push:
+    branches:
+      - master
+
+env:
+  IMAGE_NAME: hello-world-node-app
+  DOCKERHUB_REPO: iamnk007/hello-world-node-app
+  K8S_NAMESPACE: default
+  K8S_DEPLOYMENT: hello-world-node-app
+  K8S_SERVICE: hello-world-node-app-svc
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1️⃣ Checkout source code
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      # 2️⃣ Set up Docker Buildx
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      # 3️⃣ Login to Docker Hub
+      - name: Login to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      # 4️⃣ Build and push Docker image to Docker Hub
+      - name: Build and Push Docker image
+        id: build_push
+        run: |
+          IMAGE_TAG=${{ github.sha }}
+          FULL_SHA_IMG=${{ env.DOCKERHUB_REPO }}:${IMAGE_TAG}
+          LATEST_IMG=${{ env.DOCKERHUB_REPO }}:latest
+
+          echo "🚀 Building Docker image: $FULL_SHA_IMG"
+          docker build -t $FULL_SHA_IMG .
+          docker push $FULL_SHA_IMG
+
+          echo "🔄 Tagging as latest and pushing..."
+          docker tag $FULL_SHA_IMG $LATEST_IMG
+          docker push $LATEST_IMG
+
+          echo "sha_image=$FULL_SHA_IMG" >> $GITHUB_OUTPUT
+          echo "latest_image=$LATEST_IMG" >> $GITHUB_OUTPUT
+
+      # 5️⃣ Install kubectl
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v4
+        with:
+          version: 'latest'
+
+      # 6️⃣ Configure kubeconfig (connect to EKS)
+      - name: Configure kubeconfig
+        run: |
+          echo "${{ secrets.KUBE_CONFIG_DATA }}" | base64 --decode > $HOME/.kube/config
+          chmod 600 $HOME/.kube/config
+          echo "✅ Kubeconfig configured successfully"
+          kubectl cluster-info
+
+      # 7️⃣ Ensure namespace exists
+      - name: Ensure Kubernetes namespace exists
+        run: |
+          kubectl get namespace $K8S_NAMESPACE || kubectl create namespace $K8S_NAMESPACE
+
+      # 8️⃣ Deploy or update existing deployment
+      - name: Deploy to EKS
+        env:
+          IMAGE: ${{ steps.build_push.outputs.sha_image }}
+        run: |
+          set -o pipefail
+          echo "🔎 Checking for existing deployment..."
+          if kubectl get deployment $K8S_DEPLOYMENT -n $K8S_NAMESPACE >/dev/null 2>&1; then
+            echo "✅ Deployment found, updating image..."
+            kubectl set image deployment/$K8S_DEPLOYMENT hello-world-node-app=$IMAGE -n $K8S_NAMESPACE
+          else
+            echo "⚙️ Deployment not found, creating resources..."
+            kubectl apply -f kubernetes/ -n $K8S_NAMESPACE
+          fi
+
+      # 9️⃣ Wait for rollout to finish
+      - name: Wait for rollout to complete
+        run: |
+          kubectl rollout status deployment/$K8S_DEPLOYMENT -n $K8S_NAMESPACE --timeout=120s
+
+      # 🔟 Show service details (LoadBalancer info)
+      - name: Show service info
+        run: |
+          kubectl get svc -n $K8S_NAMESPACE
+          echo "🌐 Deployment completed successfully!"
