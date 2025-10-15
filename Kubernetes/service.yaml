@@ -1,0 +1,12 @@
+apiversion: v1
+kind: Service
+metadata:
+  name: hello-world-node-app
+spec:
+  type: LoadBalancer
+  selector:
+    app: hello-world-node-app
+  ports:
+    - protocol: TCP
+      port: 80
+      targetPort: 3000
