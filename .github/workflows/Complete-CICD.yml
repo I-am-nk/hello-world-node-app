@@ -3,7 +3,7 @@ name: CI/CD - Node.js App to EKS via Docker Hub
 on:
   push:
     branches:
-      - main
+      - master
 
 env:
   IMAGE_NAME: hello-world-node-app
