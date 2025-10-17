@@ -16,7 +16,7 @@ spec:
     spec:
       containers:
       - name: hello-world-node-app
-        image: iamnk007/hello-world-node-app:latest
+        image: iamnk007/hello-world-node-app:0c9c8516d6cb6716d0dcf3bc93c87d47c5a1844c
         imagePullPolicy: Always
         ports:
         - containerPort: 3000
