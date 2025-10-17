@@ -8,7 +8,7 @@ on:
 env:
   IMAGE_NAME: hello-world-node-app
   DOCKERHUB_REPO: iamnk007/hello-world-node-app
-  DEPLOYMENT_FILE: kubernetes/deployment.yaml
+  DEPLOYMENT_FILE: Kubernetes/deployment.yaml
 
 jobs:
   build-and-update:
