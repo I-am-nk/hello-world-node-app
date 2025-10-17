@@ -11,11 +11,8 @@ This guide explains how to:
 
 🧱 Architecture Overview
 
-GitHub (source repo)  
-      ↓  
-Argo CD (GitOps controller on EKS)  
-      ↓  
-EKS Cluster (running app)  
+<img width="587" height="209" alt="image" src="https://github.com/user-attachments/assets/7c5cdbb1-7eb0-4b78-97be-df509207867e" />
+ 
 
 ---
 
