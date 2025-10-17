@@ -5,6 +5,9 @@ on:
     branches:
       - master
 
+permissions:
+  contents: write
+
 env:
   IMAGE_NAME: hello-world-node-app
   DOCKERHUB_REPO: iamnk007/hello-world-node-app
