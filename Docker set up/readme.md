@@ -35,7 +35,6 @@ You should see `Hello World`.
 ---
 
 Tips:
-- Use the copy button in each code block to quickly copy commands.
 - To stop and remove the container:
 ```bash
 docker stop hello-world-app
