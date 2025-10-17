@@ -1,4 +1,4 @@
-# Terraform (EKS) Set up
+# Kubernetes (EKS) Set up
 
 🧭 EKS — Connect Bastion EC2 to EKS Cluster.
 
